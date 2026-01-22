@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Inventory Management System{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="page-header">
+        <h2>Inventory Dashboard</h2>
+        <p class="welcome-text">Welcome, {{ current_user.username }}!</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>Total Items</h3>
+                <p class="stat-value">{{ total_items }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <path d="M20 8v6"></path>
+                    <path d="M23 11h-6"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>Total Quantity</h3>
+                <p class="stat-value">{{ total_quantity }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>Total Value</h3>
+                <p class="stat-value">£{{ "%.2f"|format(total_value) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="inventory-section">
+    <div class="section-header">
+        <h2>All Inventory Items</h2>
+        <a href="{{ url_for('add_item') }}" class="btn btn-primary">+ Add New Item</a>
+    </div>
+
+    {% if items %}
+    <div class="items-grid">
+        {% for item in items %}
+        <div class="item-card {% if item['quantity'] == 0 %}out-of-stock{% elif item['quantity'] < 10 %}low-stock{% endif %}">
+            <div class="item-image">
+                {% if item['image_filename'] %}
+                    <img src="{{ url_for('static', filename='uploads/' + item['image_filename']) }}" alt="{{ item['name'] }}">
+                {% else %}
+                    <div class="no-image">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                    </div>
+                {% endif %}
+                {% if item['quantity'] == 0 %}
+                    <span class="stock-badge out">Out of Stock</span>
+                {% elif item['quantity'] < 10 %}
+                    <span class="stock-badge low">Low Stock</span>
+                {% endif %}
+            </div>
+            <div class="item-details">
+                <span class="item-category">{{ item['category'] }}</span>
+                <h3 class="item-name">{{ item['name'] }}</h3>
+                <div class="item-meta-row">
+                    <span class="item-qty">Qty: {{ item['quantity'] }}</span>
+                    <span class="item-price">£{{ "%.2f"|format(item['price']) }}</span>
+                </div>
+                <p class="item-value">Total: £{{ "%.2f"|format(item['quantity'] * item['price']) }}</p>
+            </div>
+            <div class="item-actions">
+                <a href="{{ url_for('view_item', id=item['id']) }}" class="btn btn-sm btn-info">View</a>
+                <a href="{{ url_for('edit_item', id=item['id']) }}" class="btn btn-sm btn-warning">Edit</a>
+                <form action="{{ url_for('delete_item', id=item['id']) }}" method="POST" class="inline-form"
+                      onsubmit="return confirm('Are you sure you want to delete this item?');">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+        </div>
+        <h3>No items in your inventory</h3>
+        <p>Start adding items to track your inventory</p>
+        <a href="{{ url_for('add_item') }}" class="btn btn-primary">Add Your First Item</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
