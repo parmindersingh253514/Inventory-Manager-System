@@ -7,6 +7,7 @@ A web-based Inventory Management System built with Flask and SQLite for managing
 **Module**: Computing Technology  
 **Academic Year**: 2025/2026
 
+video link: http://youtube.com/watch?v=k1kGXHkBAEo&feature=youtu.be
 ### Team Members
 
 | Name | Student ID | Contributions |
